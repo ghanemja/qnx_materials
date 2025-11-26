@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NEET QNX ROS2 IMU Demo Instructions</title>
+  <style>
+    :root {
+      --ink: #0f172a;
+      --muted: #475569;
+      --bg0: #f8fafc;
+      --bg1: rgba(99, 102, 241, .06);
+      --bg2: rgba(59, 130, 246, .06);
+      --card: #ffffff;
+      --border: #e5e7eb;
+      --accent: #4f46e5;
+      --accent-ghost: rgba(79,70,229,.12);
+      --radius: 16px;
+      --shadow: 0 10px 30px rgba(2, 6, 23, .10);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      --toc-w: 230px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      font-size: 17px;            /* slightly larger */
+      line-height: 1.65;
+      color: var(--ink);
+      background:
+        radial-gradient(900px 600px at 5% -10%, var(--bg1), transparent 55%),
+        radial-gradient(1200px 700px at 110% 10%, var(--bg2), transparent 60%),
+        linear-gradient(180deg, #ffffff, var(--bg0));
+    }
+
+    /* Header */
+    header {
+      position: sticky; top: 0; z-index: 10;
+      backdrop-filter: saturate(120%) blur(8px);
+      background: rgba(255,255,255,.85);
+      border-bottom: 1px solid var(--border);
+    }
+    .head-inner {
+      width: 96vw; max-width: 1800px;           /* wider */
+      margin: 0 auto; padding: 14px 1.5vw;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .title { font-weight: 800; letter-spacing: .2px; color: var(--ink); }
+
+    /* Layout */
+    .grid {
+      width: 96vw; max-width: 1800px;           /* wider */
+      margin: 24px auto; padding: 0 1.5vw;      /* smaller side padding */
+      display: grid;
+      grid-template-columns: var(--toc-w) 1fr;
+      gap: min(2vw, 26px);
+    }
+
+    /* TOC */
+    nav {
+      position: sticky; top: 88px; align-self: start;
+      background: rgba(255,255,255,.7);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(6px);
+    }
+    nav h3 { margin: 4px 0 10px; font-size: 14px; color: var(--muted); letter-spacing: .2px; }
+    nav a {
+      display: block;
+      padding: 10px 12px; margin: 8px 0;
+      color: var(--ink); text-decoration: none;
+      border-radius: 10px; border: 1px solid transparent;
+      transition: background .15s ease, border-color .15s ease;
+      font-size: 16px;
+    }
+    nav a:hover { background: var(--accent-ghost); border-color: #ddd; }
+    nav a.active { background: var(--accent-ghost); border-color: var(--accent); }
+
+    /* Cards + video */
+    main { min-width: 0; }
+    .video-card, .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .video-card { padding: clamp(12px, 1.4vw, 22px); }
+    .video-card h4 { margin: 0 0 8px 0; font-weight: 800; color: var(--ink); }
+    .video-card p { margin: 6px 0 14px; color: var(--ink); }
+    .video-tip { color: var(--muted); font-size: 12px; margin-top: 8px; }
+    video { width: 100%; max-height: 560px; background: #000; border-radius: 12px; display: block; }
+
+    .card .head {
+      padding: clamp(10px, 1.4vw, 16px) clamp(12px, 1.8vw, 20px);
+      background: linear-gradient(180deg, #fafafa, #f6f7fb);
+      border-bottom: 1px solid var(--border);
+      font-weight: 800; letter-spacing:.2px;
+    }
+    .card .body {
+      padding: clamp(14px, 1.8vw, 24px) clamp(16px, 2vw, 28px);
+    }
+
+    .list { margin: 10px 0 0 20px; }
+    .list li { margin: 8px 0; }
+
+    /* Steps: more spacing */
+    .section { margin-top: clamp(22px, 2.6vw, 36px); }
+    .step-grid { display: grid; gap: clamp(22px, 2.6vw, 34px); }
+    .step {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .step .step-head {
+      padding: clamp(10px, 1.4vw, 14px) clamp(12px, 1.8vw, 18px);
+      background: linear-gradient(180deg, #f9fafb, #f3f4f6);
+      border-bottom: 1px solid var(--border);
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .step .step-body {
+      padding: clamp(14px, 2vw, 22px) clamp(16px, 2.2vw, 26px);
+    }
+
+    /* Code blocks with copy buttons */
+    pre, code, .code {
+      font-family: var(--mono);
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 14px 48px 14px 14px;     /* room for copy button */
+      border-radius: 12px; overflow:auto;
+      position: relative;
+      font-size: 15px;                  /* slightly larger */
+    }
+    pre { white-space: pre-wrap; margin: 12px 0 0; }
+    .copy-btn {
+      position: absolute;
+      top: 8px; right: 8px;
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      color: #334155;
+      cursor: pointer;
+      transition: transform .05s ease, box-shadow .15s ease, background .15s ease;
+      box-shadow: 0 2px 8px rgba(2,6,23,.05);
+    }
+    .copy-btn:hover { background: #f8fafc; }
+    .copy-btn:active { transform: translateY(1px); }
+    .copy-icon { width: 14px; height: 14px; display: inline-block; }
+    .copied { background: #ecfeff; border-color: #67e8f9; color: #155e75; }
+
+    @media (max-width: 1100px) {
+      :root { --toc-w: 200px; }
+    }
+    @media (max-width: 980px) {
+      .grid { grid-template-columns: 1fr; }
+      nav { position: relative; top: 0; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="head-inner">
+    <div class="title">NEET QNX ROS2 IMU Demo Instructions</div>
+  </div>
+</header>
+
+<div class="grid">
+  <nav>
+    <h3>On this page</h3>
+    <a href="#video">Video</a>
+    <a href="#prerequisites">PREREQUISITES</a>
+    <a href="#contents">CONTENTS</a>
+    <a href="#section-a">SECTION A: Imaging the Pi with QNX</a>
+    <a href="#section-b">SECTION B: IMU Pub/Sub on QNX + ROS2</a>
+    <a href="#explanations">Explanations</a>
+  </nav>
+
+  <main>
+    <!-- Video at the top with instructional sentence (unchanged words as provided) -->
+    <section class="video-card section" id="video">
+      <h4>What You Will Be Creating</h4>
+      <p>The objective of this demo is to learn how to run your own python files with qnx/ros2 on the pi. The exercise will involve publishing real IMU readings on /imu/QNX_1/data and viewing them. When you're done, a successful run will look like the below:</p>
+      <video controls playsinline preload="metadata">
+        <!-- Keep MOV source; add an additional source without type so browser can sniff -->
+        <source src="demo.MOV" type="video/quicktime" />
+        <source src="demo.MOV" />
+        <!-- If you also export an mp4, add: <source src="demo.mp4" type="video/mp4" /> -->
+        Your browser does not support the video tag.
+      </video>
+    </section>
+
+    <!-- PREREQUISITES -->
+    <section class="card section" id="prerequisites">
+      <div class="head">PREREQUISITES</div>
+      <div class="body">
+        <div>Install the following from canvas:</div>
+        <ul class="list">
+          <li>qnx_sdp8.0_rpi4_quickstart_20250820.img (raspberry pi 4 base image)</li>
+          <li>ros2_humble_qnx_aarch64.tar.gz (base ROS 2 runtime for QNX)</li>
+          <li>the demo folder (contains imu_pub and imu_sub python files)</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- CONTENTS -->
+    <section class="card section" id="contents">
+      <div class="head">CONTENTS</div>
+      <div class="body">
+        <ul class="list">
+          <li>SECTION A: Imaging the Pi with QNX</li>
+          <li>SECTION B: Running the IMU Pub/Sub demo on QNX + ROS2</li>
+          <li>Explanations</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- SECTION A -->
+    <section class="card section" id="section-a">
+      <div class="head">SECTION A: Imaging the Pi with QNX</div>
+      <div class="body step-grid">
+
+        <div class="step">
+          <div class="step-head">Step 1:</div>
+          <div class="step-body">
+            <div>Identify your SD card device (use the WHOLE device, not a partition):</div>
+            <pre>lsblk -p -o NAME,MODEL,SIZE,MOUNTPOINT</pre>
+            <p>Example to use: /dev/sdc (do NOT use /dev/sdc1 or /dev/sdc2)</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-head">Step 2:</div>
+          <div class="step-body">
+            <div>Flash the image (adjust paths and device):</div>
+            <pre>sudo dd if=/home/yourname/qnx800/images/qnx_sdp8.0_rpi4_quickstart_20250820.img of=/dev/sdc bs=4M status=progress conv=fsync</pre>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-head">Step 3: </div>
+          <div class="step-body">
+            <div>In a new terminal or via the file explorer and text editor , cd into /media/username/<#> and change the wifi credentials in the below lines from wpa_supplicant.conf</div>
+            <pre>network={
+    ssid="neet01"
+    psk="robotics"
+}</pre> <p>Next, change the hostname in the network file to match the sticker on your robot in the network file:</p><pre>HOSTNAME=am-imu-01</pre>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-head">Step 4:</div>
+          <div class="step-body">
+            <div>When all is done, run:</div>
+            <pre>sync
+sudo eject /dev/sdc</pre>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-head">Step 5: </div>
+          <div class="step-body">
+            <div>Remove the SD card safely.</div>
+            <div>Insert it into your Raspberry Pi and power it on.</div>
+            <div class="hr"></div>
+            <div>After this, the Pi is imaged and ready for use.</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION B -->
+    <section class="card section" id="section-b">
+      <div class="head">SECTION B: Running the IMU Pub/Sub demo on QNX + ROS2</div>
+      <div class="body step-grid">
+
+        <div class="step">
+          <div class="step-head">Step 1. </div>
+          <div class="step-body">
+            <div>ssh into the pi. If you want, first check that you can reach the pi via:</div>
+            <pre>ping am-imu-01.local</pre> <p>To ssh:</p><pre>
+ssh qnxuser@am-imu-01.local</pre> <p>The password is qnxuser</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-head">Step 2: </div>
+          <div class="step-body">
+            <div>Copy tarballs to the Pi (from your linux computer)</div>
+            <pre>scp ros2_humble.tar.gz qnxuser@am-imu-01.local:/data/home/qnxuser</pre><p>This might take like 6-10 minutes depending on the card speed and network. You should see the progress increasing to 100% though.</p><pre>
+scp demo.tar.gz qnxuser@am-imu-01.local:/data/home/qnxuser</pre>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-head">Step 3: </div>
+          <div class="step-body">
+            <div>Back on the Pi, unpack the files we just downloaded:</div>
+            <pre>cd /data/home/qnxuser
+mkdir -p opt/ros/humble opt/ros/nodes demo
+tar -xzvf ros2_humble.tar.gz -C opt/ros/humble --strip-components=1
+tar -xzvf demo.tar.gz        -C demo --strip-components=1</pre>
+
+	 <p>The imu publisher file is as follows:</p>
+	 <pre>import rclpy
+from rclpy.node import Node
+from sensor_msgs.msg import Imu
+import random
+import math
+import time
+
+class ImuPublisher(Node):
+    def __init__(self):
+        super().__init__('imu_publisher')
+        self.publisher_ = self.create_publisher(Imu, '/imu/QNX_1/data', 10)
+        timer_period = 0.1  # 10 Hz
+        self.timer = self.create_timer(timer_period, self.publish_fake_imu)
+        self.get_logger().info('IMU Publisher node started.')
+
+    def publish_fake_imu(self):
+        msg = Imu()
+        # Simulate roll, pitch, yaw using sin waves or random noise
+        t = time.time()
+        roll  = math.sin(t) * 0.1
+        pitch = math.cos(t) * 0.1
+        yaw   = math.sin(t / 2) * 0.1
+
+        # Fill IMU message (radians)
+        msg.orientation.x = roll
+        msg.orientation.y = pitch
+        msg.orientation.z = yaw
+        msg.orientation.w = 1.0
+
+        msg.angular_velocity.x = random.uniform(-0.05, 0.05)
+        msg.angular_velocity.y = random.uniform(-0.05, 0.05)
+        msg.angular_velocity.z = random.uniform(-0.05, 0.05)
+
+        msg.linear_acceleration.x = random.uniform(-0.1, 0.1)
+        msg.linear_acceleration.y = random.uniform(-0.1, 0.1)
+        msg.linear_acceleration.z = random.uniform(-9.8, -9.6)
+
+        self.publisher_.publish(msg)
+        self.get_logger().info(f'Publishing IMU data: roll={roll:.3f}, pitch={pitch:.3f}, yaw={yaw:.3f}')
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = ImuPublisher()
+    rclpy.spin(node)
+    node.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+</pre>
+	 
+	 <p>Similarly for the imu subscriber file:</p>
+ 	 <pre>#!/usr/bin/env python3
+import rclpy
+from rclpy.node import Node
+from sensor_msgs.msg import Imu
+import math
+
+class ImuSubscriber(Node):
+    def __init__(self):
+        super().__init__('imu_subscriber')
+        self.subscription = self.create_subscription(
+            Imu,
+            '/imu/QNX_1/data',
+            self.listener_callback,
+            10)
+        self.subscription  # prevent unused variable warning
+        self.get_logger().info('IMU Subscriber node started.')
+
+    def listener_callback(self, msg: Imu):
+        roll  = msg.orientation.x
+        pitch = msg.orientation.y
+        yaw   = msg.orientation.z
+        self.get_logger().info(f'Received IMU data: roll={roll:.3f}, pitch={pitch:.3f}, yaw={yaw:.3f}')
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = ImuSubscriber()
+    rclpy.spin(node)
+    node.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+</pre>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-head">Step 4:</div>
+          <div class="step-body">
+            <div>Run the demo with two terminals.</div>
+            <div class="hr"></div>
+            <div>In terminal 1 (the publisher):</div>
+            <pre>. opt/ros/humble/setup.bash
+/system/bin/python3 ~/demo/imu_pub.py</pre>
+            <div>In terminal 2 (the subscriber):</div>
+            <pre>. opt/ros/humble/setup.bash
+/system/bin/python3 ~/demo/imu_sub.py</pre>
+            <div class="hr"></div>
+            
+            <div>Now you should see roll/pitch/yaw numbers streaming!</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Explanations -->
+    <section class="card section" id="explanations">
+      <div class="head">Explanations</div>
+      <div class="body">
+        <p>There are 3 main layers in our setup - the QNX layer, the ROS2 layer, and the python scripts with our demo.
+
+QNX is our base operating system which provides a real-time operating system on the raspberry pi. Linux is not a real time system. This means that QNX guarantees that critical tasks like sensor polling or control loops happen in precise time limits. It does this through:
+
+1. A microkernel architecture (only the essential kernel runs in privileged mode, everything else like drivers/filesystems/networking run as separate user space processes
+2. Priority based schedule means that higher priority tasks always run first which avoids latency spikes
+3. Deterministic message passing whihc means that inter process communication is predictable and bounded in time. 
+
+Essentailly where Linux might pause during heavy I/O or context switches, QNX ensures that real time tasks run within their time requirements.
+
+ROS2 humble is our middleware layer that provides modular messaging and communication capabilities between processes (these are known as nodes). If you see the acronym DDS (data distribution service), this refers to the standarrd protocol used for all messaging which operates in a publish/subscribe fashion.
+
+Our demo (imu_pub.py and imu_sub.py) contains the application nodes using rclpy (the python library for ros2) and sensor_msgs.
+
+The Raspberry pi boots QNX as the operating system.  The image we flashed contains the QNX kernel, drivers, shell, and python runtime. All of the paths we created for the demo and ros files exist in QNX's filesystem.
+
+The ros2_humble.tar.gz file is the qnx compiled build of ros2 humble. When we extract and source it we are setting up the environment variables that point to the qnx compatible binaries and llibraries. 
+
+This means that when we run the python scripts, we are importing packages from the QNX-build ROS2 installtion, not the normal linux one.
+
+imu_pub creates and publishes a sensor_msgs/msg/imu message
+imu_sub subscribes to that topic via dds.</p>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  // TOC active state
+  const ids = ["video","prerequisites","contents","section-a","section-b","explanations"];
+  const links = Array.from(document.querySelectorAll("nav a"));
+  const map = Object.fromEntries(links.map(a => [a.getAttribute("href").slice(1), a]));
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(a => a.classList.remove("active"));
+        const l = map[e.target.id];
+        if (l) l.classList.add("active");
+      }
+    });
+  }, { rootMargin: "-50% 0px -45% 0px", threshold: [0,1] });
+  ids.forEach(id => { const el = document.getElementById(id); if (el) io.observe(el); });
+
+  const addCopyButtons = () => {
+    const pres = document.querySelectorAll("pre");
+    pres.forEach(pre => {
+      if (pre.dataset.hasCopy) return;
+      pre.dataset.hasCopy = "1";
+      const btn = document.createElement("button");
+      btn.className = "copy-btn";
+      btn.innerHTML = `<svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                       </svg><span>Copy</span>`;
+      btn.addEventListener("click", async () => {
+        const codeText = Array.from(pre.childNodes)
+          .filter(n => n.nodeType === Node.TEXT_NODE)
+          .map(n => n.textContent)
+          .join('')
+          .trim();
+        try {
+          await navigator.clipboard.writeText(codeText);
+          btn.classList.add("copied");
+          const span = btn.querySelector("span");
+          const old = span.textContent;
+          span.textContent = "Copied!";
+          setTimeout(() => { btn.classList.remove("copied"); span.textContent = old; }, 1200);
+        } catch (e) {
+          const range = document.createRange();
+          range.selectNodeContents(pre);
+          const sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+      });
+      pre.appendChild(btn);
+    });
+  };
+  addCopyButtons();
+</script>
+</body>
+</html>
