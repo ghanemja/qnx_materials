@@ -1,4 +1,3 @@
-````markdown
 ## PREREQUISITES
 
 Install the following from Canvas:
@@ -206,7 +205,3 @@ This means that when we run the Python scripts, we are importing packages from t
 
 * `imu_pub` creates and publishes a `sensor_msgs/msg/Imu` message.
 * `imu_sub` subscribes to that topic via DDS and logs the IMU data.
-
-```
-```
-
